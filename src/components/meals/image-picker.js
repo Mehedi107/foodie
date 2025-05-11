@@ -1,13 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import classes from './image-picker.module.css';
 import Image from 'next/image';
 
 export default function ImagePicker({ label, name }) {
   const imageInput = useRef();
   const [pickedImage, setPickedImage] = useState(null);
-  // const [preview, setPreview] = useState(null);
 
   function handlePickClick() {
     imageInput.current.click();
@@ -16,25 +15,39 @@ export default function ImagePicker({ label, name }) {
   function handleFileChange(event) {
     const file = event.target.files[0];
     if (file) {
-      // const imageUrl = URL.createObjectURL(file);
-      // setPickedImage(imageUrl);
-
-      ///////////////
-      const fileReader = new FileReader();
-
-      fileReader.onload = () => {
-        setPickedImage(fileReader.result);
-      };
-
-      fileReader.readAsDataURL(file);
+      const imageUrl = URL.createObjectURL(file);
+      setPickedImage(imageUrl);
     } else {
-      // setPickedImage(null);
       setPickedImage(null);
     }
   }
 
-  // console.log('>>>>', pickedImage);
-  // console.log(preview);
+  /*
+  function handleImageChange(event) {
+    const file = event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    const fileReader = new FileReader();
+
+    fileReader.onload = () => {
+      setPickedImage(fileReader.result);
+    };
+
+    fileReader.readAsDataURL(file);
+  }
+  */
+
+  // Cleanup to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (pickedImage) {
+        URL.revokeObjectURL(pickedImage);
+      }
+    };
+  }, [pickedImage]);
 
   return (
     <div className={classes.picker}>
